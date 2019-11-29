@@ -1,6 +1,9 @@
 # Cordova Deeplinks Plugin
 
-**NOTE:** This is a fork from the original cordova plugin "cordova-deeplinks" that in turn is a fork from "cordova-universal-links-plugin"
+**NOTE:** This is a fork from the original cordova plugin "cordova-plugin-deeplinks" that in turn is a fork from "cordova-deeplinks" that in turn is a fork from "cordova-universal-links-plugin"
+
+***What's new*** This fork addresses the issue: https://github.com/e-imaxina/cordova-plugin-deeplinks/issues/15
+
 
 This Cordova plugin adds support for opening an application from the browser when user clicks on the link. Better known as:
 - [Universal Links on iOS](https://developer.apple.com/library/ios/documentation/General/Conceptual/AppSearch/UniversalLinks.html)
@@ -51,7 +54,7 @@ It is important not only to redirect users to your app from the web, but also pr
 This requires cordova 5.0+ (current stable 1.2.1)
 
 ```sh
-cordova plugin add cordova-plugin-deeplinks
+cordova plugin add cordova-plugin-deeplinks2
 ```
 
 It is also possible to install via repo url directly (**unstable**)

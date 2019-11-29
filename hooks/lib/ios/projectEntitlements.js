@@ -15,7 +15,6 @@ var ASSOCIATED_DOMAINS = 'com.apple.developer.associated-domains';
 var context;
 var projectRoot;
 var projectName;
-var entitlementsFilePath;
 
 module.exports = {
   generateAssociatedDomainsEntitlements: generateEntitlements
@@ -32,10 +31,15 @@ module.exports = {
 function generateEntitlements(cordovaContext, pluginPreferences) {
   context = cordovaContext;
 
-  var currentEntitlements = getEntitlementsFileContent();
-  var newEntitlements = injectPreferences(currentEntitlements, pluginPreferences);
+  var paths = pathsToEntitlementsFiles();
+  for (var entitlementsFilePath of paths) {
+    if (fs.existsSync(entitlementsFilePath)) {
+      var currentEntitlements = getEntitlementsFileContent(entitlementsFilePath);
+      var newEntitlements = injectPreferences(currentEntitlements, pluginPreferences);
 
-  saveContentToEntitlementsFile(newEntitlements);
+      saveContentToEntitlementsFile(entitlementsFilePath, newEntitlements);
+    }
+  }
 }
 
 // endregion
@@ -47,15 +51,11 @@ function generateEntitlements(cordovaContext, pluginPreferences) {
  *
  * @param {Object} content - data to save; JSON object that will be transformed into xml
  */
-function saveContentToEntitlementsFile(content) {
+function saveContentToEntitlementsFile(entitlementsFilePath, content) {
   var plistContent = plist.build(content);
-  var filePath = pathToEntitlementsFile();
-
-  // ensure that file exists
-  mkpath.sync(path.dirname(filePath));
 
   // save it's content
-  fs.writeFileSync(filePath, plistContent, 'utf8');
+  fs.writeFileSync(entitlementsFilePath, plistContent, 'utf8');
 }
 
 /**
@@ -63,12 +63,11 @@ function saveContentToEntitlementsFile(content) {
  *
  * @return {String} entitlements file content
  */
-function getEntitlementsFileContent() {
-  var pathToFile = pathToEntitlementsFile();
+function getEntitlementsFileContent(entitlementsFilePath) {
   var content;
 
   try {
-    content = fs.readFileSync(pathToFile, 'utf8');
+    content = fs.readFileSync(entitlementsFilePath, 'utf8');
   } catch (err) {
     return defaultEntitlementsFile();
   }
@@ -134,18 +133,17 @@ function domainsListEntryForHost(host) {
 // endregion
 
 // region Path helper methods
-
 /**
  * Path to entitlements file.
  *
  * @return {String} absolute path to entitlements file
  */
-function pathToEntitlementsFile() {
-  if (entitlementsFilePath === undefined) {
-    entitlementsFilePath = path.join(getProjectRoot(), 'platforms', 'ios', getProjectName(), 'Resources', getProjectName() + '.entitlements');
-  }
-
-  return entitlementsFilePath;
+function pathsToEntitlementsFiles() {
+  return [
+    path.join(getProjectRoot(), 'platforms', 'ios', getProjectName(), 'Resources', getProjectName() + '.entitlements'),
+    path.join(getProjectRoot(), 'platforms', 'ios', getProjectName(), 'Entitlements-Debug.plist'),
+    path.join(getProjectRoot(), 'platforms', 'ios', getProjectName(), 'Entitlements-Release.plist'),
+  ];
 }
 
 /**
